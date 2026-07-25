@@ -1,0 +1,11 @@
+{
+  "name": "PresensiKu SD",
+  "description": "Sistem Presensi Digital Sekolah Dasar berbasis GPS, AI Face Detection, Rekap Realtime, PDF Slip & Portal Multi-Role untuk SDN 1 Sangkorang.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
