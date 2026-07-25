@@ -53,11 +53,17 @@ export const DataGuruView: React.FC<DataGuruViewProps> = ({ users, onShowQRModal
           >
             <div className="flex items-start gap-3">
               <div className="relative group shrink-0">
-                <img
-                  src={guru.foto}
-                  alt={guru.nama}
-                  className="w-14 h-14 rounded-2xl object-cover border-2 border-slate-100 shadow-sm"
-                />
+                {guru.foto ? (
+                  <img
+                    src={guru.foto}
+                    alt={guru.nama}
+                    className="w-14 h-14 rounded-2xl object-cover border-2 border-slate-100 shadow-sm"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-2xl bg-slate-200 border-2 border-slate-100 shadow-sm flex items-center justify-center font-bold text-slate-600 text-lg">
+                    {guru.nama?.[0] || 'G'}
+                  </div>
+                )}
                 {onEditPhoto && (
                   <button
                     type="button"

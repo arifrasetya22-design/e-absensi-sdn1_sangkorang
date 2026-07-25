@@ -276,6 +276,7 @@ export const AbsenModal: React.FC<AbsenModalProps> = ({
     }
 
     onSubmitPresensi(newRecord);
+    alert('✅ Data presensi selfie & lokasi GPS berhasil disimpan!');
     setIsSubmitting(false);
   };
 
@@ -368,11 +369,15 @@ export const AbsenModal: React.FC<AbsenModalProps> = ({
                 </>
               ) : (
                 <div className="relative w-full h-full flex items-center justify-center bg-slate-900">
-                  <img
-                    src={watermarkedPhoto || capturedPhoto}
-                    alt="Selfie Presensi"
-                    className="w-full h-full object-contain"
-                  />
+                  {(watermarkedPhoto || capturedPhoto) ? (
+                    <img
+                      src={watermarkedPhoto || capturedPhoto}
+                      alt="Selfie Presensi"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="text-white text-xs">Foto tidak tersedia</div>
+                  )}
                   <div className="absolute top-3 right-3 bg-emerald-500 text-slate-950 font-bold text-[10px] px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Watermark Terpasang</span>

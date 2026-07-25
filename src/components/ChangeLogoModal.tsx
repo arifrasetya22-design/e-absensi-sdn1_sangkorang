@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SekolahConfig } from '../types';
-import { X, Upload, Building2, Check, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { X, Upload, Building2, Check, Image as ImageIcon, Sparkles, Loader2 } from 'lucide-react';
+import { compressImageFile } from '../utils/imageCompressor';
 
 interface ChangeLogoModalProps {
   sekolah: SekolahConfig;
@@ -26,23 +27,38 @@ export const ChangeLogoModal: React.FC<ChangeLogoModalProps> = ({
   const [customUrl, setCustomUrl] = useState('');
   const [activeTab, setActiveTab] = useState<'upload' | 'preset' | 'url'>('upload');
   const [dragActive, setDragActive] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   if (!isOpen) return null;
+
+  const processLogoFile = async (file: File) => {
+    setUploadError('');
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Harap pilih file gambar logo (PNG, JPG, WEBP).');
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      setUploadError('Ukuran file logo terlalu besar. Maksimal 15MB.');
+      return;
+    }
+
+    try {
+      setIsCompressing(true);
+      const compressedBase64 = await compressImageFile(file, 300, 300, 0.85);
+      setLogoUrl(compressedBase64);
+    } catch (err: any) {
+      console.error(err);
+      setUploadError(err.message || 'Gagal memproses file logo.');
+    } finally {
+      setIsCompressing(false);
+    }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Ukuran file maksimal 5MB');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setLogoUrl(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      processLogoFile(file);
     }
   };
 
@@ -50,14 +66,7 @@ export const ChangeLogoModal: React.FC<ChangeLogoModalProps> = ({
     e.preventDefault();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setLogoUrl(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      processLogoFile(e.dataTransfer.files[0]);
     }
   };
 
@@ -67,6 +76,7 @@ export const ChangeLogoModal: React.FC<ChangeLogoModalProps> = ({
       return;
     }
     onSaveLogo(logoUrl);
+    alert('✅ Logo website & sekolah berhasil diperbarui & disimpan!');
     onClose();
   };
 
@@ -100,14 +110,18 @@ export const ChangeLogoModal: React.FC<ChangeLogoModalProps> = ({
           {/* Current / Preview Logo */}
           <div className="flex flex-col items-center justify-center space-y-2">
             <div className="w-24 h-24 rounded-2xl border-2 border-gray-200 p-2 bg-white shadow-xs flex items-center justify-center overflow-hidden">
-              <img
-                src={logoUrl || sekolah.logoUrl}
-                alt="Logo Preview"
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=200&auto=format&fit=crop&q=80';
-                }}
-              />
+              {(logoUrl || sekolah.logoUrl) ? (
+                <img
+                  src={logoUrl || sekolah.logoUrl}
+                  alt="Logo Preview"
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=200&auto=format&fit=crop&q=80';
+                  }}
+                />
+              ) : (
+                <Building2 className="w-10 h-10 text-gray-400" />
+              )}
             </div>
             <p className="text-xs text-gray-500 font-medium">Pratinjau Logo Website Utama Header</p>
           </div>
@@ -145,30 +159,38 @@ export const ChangeLogoModal: React.FC<ChangeLogoModalProps> = ({
 
           {/* Tab 1: Upload File */}
           {activeTab === 'upload' && (
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-              onDragLeave={() => setDragActive(false)}
-              onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors ${
-                dragActive ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <input
-                type="file"
-                id="logo-file-input"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <label htmlFor="logo-file-input" className="cursor-pointer block space-y-2">
-                <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-700 flex items-center justify-center mx-auto">
-                  <Upload className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-[#1E293B]">Klik untuk Unggah Logo Baru (PNG/JPG)</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">Rekomendasi rasio 1:1 transparan atau persegi (Maksimal 5MB)</p>
-                </div>
-              </label>
+            <div className="space-y-2">
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors ${
+                  dragActive ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <input
+                  type="file"
+                  id="logo-file-input"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  disabled={isCompressing}
+                />
+                <label htmlFor="logo-file-input" className="cursor-pointer block space-y-2">
+                  <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-700 flex items-center justify-center mx-auto">
+                    {isCompressing ? <Loader2 className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[#1E293B]">
+                      {isCompressing ? 'Sedang Memproses & Mengompres Logo...' : 'Klik untuk Unggah Logo File Baru (PNG/JPG)'}
+                    </p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Rekomendasi rasio 1:1 transparan atau persegi (Otomatis Dioptimalkan)</p>
+                  </div>
+                </label>
+              </div>
+              {uploadError && (
+                <p className="text-xs text-rose-600 font-semibold text-center">{uploadError}</p>
+              )}
             </div>
           )}
 

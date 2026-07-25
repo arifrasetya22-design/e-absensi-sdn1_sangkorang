@@ -50,6 +50,7 @@ export const IzinSakitModal: React.FC<IzinSakitModalProps> = ({
       dokumenUrl: dokumenFile || 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=400&auto=format&fit=crop&q=80'
     });
 
+    alert('✅ Surat pengajuan Izin/Sakit & lampiran file berhasil disimpan!');
     onClose();
   };
 

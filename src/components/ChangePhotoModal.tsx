@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User } from '../types';
-import { X, Upload, Camera, Check, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { X, Upload, Camera, Check, Image as ImageIcon, Sparkles, Loader2 } from 'lucide-react';
+import { compressImageFile } from '../utils/imageCompressor';
 
 interface ChangePhotoModalProps {
   user: User;
@@ -30,23 +31,38 @@ export const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({
   const [customInput, setCustomInput] = useState('');
   const [activeTab, setActiveTab] = useState<'upload' | 'preset' | 'url'>('upload');
   const [dragActive, setDragActive] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   if (!isOpen) return null;
+
+  const processFile = async (file: File) => {
+    setUploadError('');
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Harap pilih file gambar (JPG, PNG, WEBP).');
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      setUploadError('Ukuran file terlalu besar. Maksimal 15MB.');
+      return;
+    }
+
+    try {
+      setIsCompressing(true);
+      const compressedBase64 = await compressImageFile(file, 300, 300, 0.85);
+      setPhotoUrl(compressedBase64);
+    } catch (err: any) {
+      console.error(err);
+      setUploadError(err.message || 'Gagal memproses gambar');
+    } finally {
+      setIsCompressing(false);
+    }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Ukuran file maksimal 5MB');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setPhotoUrl(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      processFile(file);
     }
   };
 
@@ -54,14 +70,7 @@ export const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({
     e.preventDefault();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setPhotoUrl(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      processFile(e.dataTransfer.files[0]);
     }
   };
 
@@ -71,6 +80,7 @@ export const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({
       return;
     }
     onSavePhoto(user.id, photoUrl);
+    alert('✅ Foto profil pengguna berhasil diperbarui & disimpan!');
     onClose();
   };
 
@@ -104,11 +114,17 @@ export const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({
           {/* Current / Preview Photo */}
           <div className="flex flex-col items-center justify-center space-y-2">
             <div className="relative group">
-              <img
-                src={photoUrl || user.foto}
-                alt="Preview"
-                className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md ring-2 ring-blue-500/20"
-              />
+              {(photoUrl || user.foto) ? (
+                <img
+                  src={photoUrl || user.foto}
+                  alt="Preview"
+                  className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-md ring-2 ring-blue-500/20"
+                />
+              ) : (
+                <div className="w-28 h-28 rounded-full bg-slate-200 border-4 border-white shadow-md ring-2 ring-blue-500/20 flex items-center justify-center font-bold text-slate-600 text-2xl">
+                  {user.nama?.[0] || 'U'}
+                </div>
+              )}
               <div className="absolute inset-0 rounded-full bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
                 Preview
               </div>
@@ -149,30 +165,38 @@ export const ChangePhotoModal: React.FC<ChangePhotoModalProps> = ({
 
           {/* Tab 1: Upload File */}
           {activeTab === 'upload' && (
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-              onDragLeave={() => setDragActive(false)}
-              onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors ${
-                dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <input
-                type="file"
-                id="user-photo-file-input"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <label htmlFor="user-photo-file-input" className="cursor-pointer block space-y-2">
-                <div className="w-12 h-12 rounded-full bg-blue-50 text-[#2563EB] flex items-center justify-center mx-auto">
-                  <Upload className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-[#1E293B]">Klik untuk Unggah atau Tarik File Ke Sini</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">Format JPG, PNG, WEBP (Maksimal 5MB)</p>
-                </div>
-              </label>
+            <div className="space-y-2">
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-2xl p-6 text-center transition-colors ${
+                  dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <input
+                  type="file"
+                  id="user-photo-file-input"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  disabled={isCompressing}
+                />
+                <label htmlFor="user-photo-file-input" className="cursor-pointer block space-y-2">
+                  <div className="w-12 h-12 rounded-full bg-blue-50 text-[#2563EB] flex items-center justify-center mx-auto">
+                    {isCompressing ? <Loader2 className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-[#1E293B]">
+                      {isCompressing ? 'Sedang Mengompres Foto...' : 'Klik untuk Unggah atau Tarik File Ke Sini'}
+                    </p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Format JPG, PNG, WEBP (Otomatis Kompres & Optimasi)</p>
+                  </div>
+                </label>
+              </div>
+              {uploadError && (
+                <p className="text-xs text-rose-600 font-semibold text-center">{uploadError}</p>
+              )}
             </div>
           )}
 

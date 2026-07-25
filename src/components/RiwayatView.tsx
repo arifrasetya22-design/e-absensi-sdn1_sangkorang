@@ -171,7 +171,11 @@ export const RiwayatView: React.FC<RiwayatViewProps> = ({ presensiList, sekolah,
               ✕
             </button>
             <h4 className="text-sm font-bold text-slate-800 mb-3">Foto Selfie Watermark Presensi</h4>
-            <img src={selectedPhotoModal} alt="" className="w-full rounded-2xl border border-slate-200 shadow-md" />
+            {selectedPhotoModal ? (
+              <img src={selectedPhotoModal} alt="" className="w-full rounded-2xl border border-slate-200 shadow-md" />
+            ) : (
+              <div className="p-8 text-center text-xs text-slate-500">Foto tidak tersedia</div>
+            )}
           </div>
         </div>
       )}

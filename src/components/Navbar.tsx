@@ -208,12 +208,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => setShowSwitchMenu(!showSwitchMenu)}
                 className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition-colors border border-gray-200"
               >
-                <div className="w-9 h-9 rounded-full bg-gray-200 border-2 border-white shadow-xs overflow-hidden shrink-0">
-                  <img
-                    src={currentUser.foto}
-                    alt={currentUser.nama}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="w-9 h-9 rounded-full bg-gray-200 border-2 border-white shadow-xs overflow-hidden shrink-0 flex items-center justify-center">
+                  {currentUser.foto ? (
+                    <img
+                      src={currentUser.foto}
+                      alt={currentUser.nama}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs font-bold text-gray-600">{currentUser.nama?.[0] || 'U'}</span>
+                  )}
                 </div>
                 <div className="text-left hidden lg:block pr-1">
                   <p className="text-xs font-bold text-[#1E293B] line-clamp-1">{currentUser.nama.split(',')[0]}</p>
@@ -257,36 +261,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <span>Ganti Logo Website</span>
                       </button>
                     )}
-                  </div>
-
-                  <div className="px-3 py-2">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">
-                      Ganti Peran Demo:
-                    </span>
-                    <div className="space-y-1 max-h-48 overflow-y-auto">
-                      {allUsers.map(u => (
-                        <button
-                          key={u.id}
-                          type="button"
-                          onClick={() => {
-                            onSwitchUser(u);
-                            setShowSwitchMenu(false);
-                          }}
-                          className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs text-left transition-colors ${
-                            u.id === currentUser.id
-                              ? 'bg-blue-50 text-[#2563EB] font-bold'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                        >
-                          <img src={u.foto} alt="" className="w-6 h-6 rounded-lg object-cover" />
-                          <div className="flex-1 min-w-0">
-                            <p className="line-clamp-1 font-semibold">{u.nama}</p>
-                            <span className="text-[9px] text-gray-400 block line-clamp-1">{u.role} - {u.jabatan}</span>
-                          </div>
-                          {u.id === currentUser.id && <UserCheck className="w-3.5 h-3.5 text-[#2563EB] shrink-0" />}
-                        </button>
-                      ))}
-                    </div>
                   </div>
 
                   <div className="border-t border-gray-100 mt-1 pt-1 px-3">

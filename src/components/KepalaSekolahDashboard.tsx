@@ -302,11 +302,17 @@ export const KepalaSekolahDashboard: React.FC<KepalaSekolahDashboardProps> = ({
                 return (
                   <tr key={guru.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-2.5 px-3">
-                      <img
-                        src={rec?.fotoSelfieMasuk || guru.foto}
-                        alt=""
-                        className="w-10 h-10 rounded-xl object-cover border border-slate-200"
-                      />
+                      {(rec?.fotoSelfieMasuk || guru.foto) ? (
+                        <img
+                          src={rec?.fotoSelfieMasuk || guru.foto}
+                          alt=""
+                          className="w-10 h-10 rounded-xl object-cover border border-slate-200"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-slate-200 flex items-center justify-center font-bold text-slate-600 border border-slate-200 text-xs">
+                          {guru.nama?.[0] || 'G'}
+                        </div>
+                      )}
                     </td>
                     <td className="py-2.5 px-3">
                       <p className="font-bold text-slate-800">{guru.nama}{guru.gelar ? `, ${guru.gelar}` : ''}</p>
