@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, Component } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { User, SekolahConfig, PresensiRecord, IzinRecord, Notifikasi, RekapBulanan } from './types';
 import { initialUsers, initialSekolah, initialPresensi, initialIzin, initialNotifikasi } from './data/initialData';
 import { saveOfflinePresensi, getOfflinePresensiQueue, clearOfflinePresensiQueue } from './utils/offlineQueue';
@@ -585,63 +586,73 @@ function safeSetLocalStorage(key: string, value: any) {
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
         
-        {/* Render Portal Dashboard Based on User Role or Bottom Nav Active Tab */}
-        {activeTab === 'dashboard' ? (
-          currentUser.role === 'Guru' ? (
-            <GuruDashboard
-              currentUser={currentUser}
-              sekolah={sekolah}
-              todayRecord={todayRecord}
-              rekap={computedRekap}
-              onOpenAbsenMasuk={() => setAbsenModal({ show: true, type: 'MASUK' })}
-              onOpenAbsenPulang={() => setAbsenModal({ show: true, type: 'PULANG' })}
-              onOpenFormIzinSakit={(t) => setIzinModal({ show: true, type: t })}
-              onChangeTab={setActiveTab}
-              onGenerateSlip={() => setShowSlipModal(true)}
-            />
-          ) : currentUser.role === 'Kepala Sekolah' ? (
-            <KepalaSekolahDashboard
-              users={users}
-              presensiList={presensiList}
-              izinList={izinList}
-              sekolah={sekolah}
-              onApproveIzin={handleApproveIzin}
-              onSendWhatsAppReminder={handleSendWAReminder}
-            />
-          ) : (
-            <AdminDashboard
-              users={users}
-              sekolah={sekolah}
-              presensiList={presensiList}
-              onUpdateSekolah={setSekolah}
-              onAddGuru={(g) => setUsers([g, ...users])}
-              onUpdateGuru={(g) => setUsers(users.map(u => u.id === g.id ? g : u))}
-              onDeleteGuru={(id) => setUsers(users.filter(u => u.id !== id))}
-              onShowQRModal={(g) => setQrModalGuru(g)}
-              onEditPhoto={(g) => setPhotoModalUser(g)}
-            />
-          )
-        ) : activeTab === 'rekap' ? (
-          <GuruDashboard
-            currentUser={currentUser}
-            sekolah={sekolah}
-            todayRecord={todayRecord}
-            rekap={computedRekap}
-            onOpenAbsenMasuk={() => setAbsenModal({ show: true, type: 'MASUK' })}
-            onOpenAbsenPulang={() => setAbsenModal({ show: true, type: 'PULANG' })}
-            onOpenFormIzinSakit={(t) => setIzinModal({ show: true, type: t })}
-            onChangeTab={setActiveTab}
-            onGenerateSlip={() => setShowSlipModal(true)}
-          />
-        ) : activeTab === 'riwayat' ? (
-          <RiwayatView presensiList={presensiList} sekolah={sekolah} currentUser={currentUser} />
-        ) : activeTab === 'guru' ? (
-          <DataGuruView users={users} onShowQRModal={(g) => setQrModalGuru(g)} onEditPhoto={(g) => setPhotoModalUser(g)} />
-        ) : (
-          <DataSekolahView sekolah={sekolah} />
-        )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
+            {/* Render Portal Dashboard Based on User Role or Bottom Nav Active Tab */}
+            {activeTab === 'dashboard' ? (
+              currentUser.role === 'Guru' ? (
+                <GuruDashboard
+                  currentUser={currentUser}
+                  sekolah={sekolah}
+                  todayRecord={todayRecord}
+                  rekap={computedRekap}
+                  onOpenAbsenMasuk={() => setAbsenModal({ show: true, type: 'MASUK' })}
+                  onOpenAbsenPulang={() => setAbsenModal({ show: true, type: 'PULANG' })}
+                  onOpenFormIzinSakit={(t) => setIzinModal({ show: true, type: t })}
+                  onChangeTab={setActiveTab}
+                  onGenerateSlip={() => setShowSlipModal(true)}
+                />
+              ) : currentUser.role === 'Kepala Sekolah' ? (
+                <KepalaSekolahDashboard
+                  users={users}
+                  presensiList={presensiList}
+                  izinList={izinList}
+                  sekolah={sekolah}
+                  onApproveIzin={handleApproveIzin}
+                  onSendWhatsAppReminder={handleSendWAReminder}
+                />
+              ) : (
+                <AdminDashboard
+                  users={users}
+                  sekolah={sekolah}
+                  presensiList={presensiList}
+                  onUpdateSekolah={setSekolah}
+                  onAddGuru={(g) => setUsers([g, ...users])}
+                  onUpdateGuru={(g) => setUsers(users.map(u => u.id === g.id ? g : u))}
+                  onDeleteGuru={(id) => setUsers(users.filter(u => u.id !== id))}
+                  onShowQRModal={(g) => setQrModalGuru(g)}
+                  onEditPhoto={(g) => setPhotoModalUser(g)}
+                />
+              )
+            ) : activeTab === 'rekap' ? (
+              <GuruDashboard
+                currentUser={currentUser}
+                sekolah={sekolah}
+                todayRecord={todayRecord}
+                rekap={computedRekap}
+                onOpenAbsenMasuk={() => setAbsenModal({ show: true, type: 'MASUK' })}
+                onOpenAbsenPulang={() => setAbsenModal({ show: true, type: 'PULANG' })}
+                onOpenFormIzinSakit={(t) => setIzinModal({ show: true, type: t })}
+                onChangeTab={setActiveTab}
+                onGenerateSlip={() => setShowSlipModal(true)}
+              />
+            ) : activeTab === 'riwayat' ? (
+              <RiwayatView presensiList={presensiList} sekolah={sekolah} currentUser={currentUser} />
+            ) : activeTab === 'guru' ? (
+              <DataGuruView users={users} onShowQRModal={(g) => setQrModalGuru(g)} onEditPhoto={(g) => setPhotoModalUser(g)} />
+            ) : (
+              <DataSekolahView sekolah={sekolah} />
+            )}
+          </motion.div>
+        </AnimatePresence>
 
       </main>
 
