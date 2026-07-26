@@ -24,20 +24,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ users, sekolah, onLogi
   const handleRoleSelect = (r: UserRole) => {
     setSelectedRole(r);
     setErrorMsg('');
-    // Auto populate sample credentials for convenience
-    if (r === 'Guru') {
-      setIdentifier('');
-      setPassword('');
-    } else if (r === 'Kepala Sekolah') {
-      setIdentifier('196805101992031004');
-      setPassword('password');
-    } else if (r === 'Operator') {
-      setIdentifier('199402182019022001');
-      setPassword('password');
-    } else if (r === 'Admin') {
-      setIdentifier('199001012015011001');
-      setPassword('password');
-    }
+    setIdentifier('');
+    setPassword('');
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -173,31 +161,31 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ users, sekolah, onLogi
             )}
 
             {selectedRole === 'Kepala Sekolah' && (
-              <div className="p-3 bg-indigo-50/90 border border-indigo-200 text-indigo-900 text-xs rounded-xl flex items-start gap-2.5">
+              <div className="p-3 bg-indigo-50/80 border border-indigo-200 text-indigo-900 text-xs rounded-xl flex items-start gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold block">Akses Demo Kepala Sekolah</span>
-                  <span className="text-[11px] text-indigo-700 block">NIP: <code className="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">196805101992031004</code> | Password: <code className="bg-indigo-100 px-1 py-0.5 rounded font-mono font-bold">password</code></span>
+                  <span className="font-bold block">Portal Login Kepala Sekolah</span>
+                  <span className="text-[11px] text-indigo-700">Masukkan NIP / Email Kepala Sekolah & Password Anda untuk persetujuan izin & monitoring presensi.</span>
                 </div>
               </div>
             )}
 
             {selectedRole === 'Operator' && (
-              <div className="p-3 bg-amber-50/90 border border-amber-200 text-amber-900 text-xs rounded-xl flex items-start gap-2.5">
+              <div className="p-3 bg-amber-50/80 border border-amber-200 text-amber-900 text-xs rounded-xl flex items-start gap-2.5">
                 <Building2 className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold block">Akses Demo Operator Sekolah</span>
-                  <span className="text-[11px] text-amber-800 block">NIP: <code className="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">199402182019022001</code> | Password: <code className="bg-amber-100 px-1 py-0.5 rounded font-mono font-bold">password</code></span>
+                  <span className="font-bold block">Portal Login Operator Sekolah</span>
+                  <span className="text-[11px] text-amber-800">Masukkan NIP / Username Operator & Password untuk kelola data master sekolah & guru.</span>
                 </div>
               </div>
             )}
 
             {selectedRole === 'Admin' && (
-              <div className="p-3 bg-purple-50/90 border border-purple-200 text-purple-900 text-xs rounded-xl flex items-start gap-2.5">
+              <div className="p-3 bg-purple-50/80 border border-purple-200 text-purple-900 text-xs rounded-xl flex items-start gap-2.5">
                 <KeyRound className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold block">Akses Demo Administrator Master</span>
-                  <span className="text-[11px] text-purple-800 block">NIP: <code className="bg-purple-100 px-1 py-0.5 rounded font-mono font-bold">199001012015011001</code> | Password: <code className="bg-purple-100 px-1 py-0.5 rounded font-mono font-bold">password</code></span>
+                  <span className="font-bold block">Portal Login Administrator Master</span>
+                  <span className="text-[11px] text-purple-800">Masukkan NIP / Email Admin & Password untuk akses master konfigurasi & reset password pengguna.</span>
                 </div>
               </div>
             )}

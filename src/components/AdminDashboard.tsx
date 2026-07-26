@@ -22,7 +22,12 @@ import {
   Navigation,
   Loader2,
   Search,
-  UserX
+  UserX,
+  KeyRound,
+  Key,
+  Eye,
+  EyeOff,
+  Lock
 } from 'lucide-react';
 import { exportGuruToCSV } from '../utils/excelExporter';
 import { MapView } from './MapView';
@@ -117,6 +122,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Custom Modals & Toast State for User Deletion & Actions
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [userToResetPassword, setUserToResetPassword] = useState<User | null>(null);
+  const [newPasswordInput, setNewPasswordInput] = useState<string>('');
+  const [showPasswordText, setShowPasswordText] = useState<boolean>(false);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [actionToast, setActionToast] = useState<string | null>(null);
 
@@ -464,6 +472,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             title="Lihat QR Code Guru"
                           >
                             <QrCode className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setUserToResetPassword(guru);
+                              setNewPasswordInput(guru.password || 'password');
+                              setShowPasswordText(false);
+                            }}
+                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                            title="Reset / Ganti Password User"
+                          >
+                            <KeyRound className="w-4 h-4" />
                           </button>
                           <button
                             type="button"
@@ -1081,6 +1101,100 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Hapus {totalNonaktifCount} User Nonaktif</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Reset / Ganti Password User */}
+      {userToResetPassword && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 text-amber-600">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center shrink-0">
+                <KeyRound className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900">Reset & Ganti Password</h3>
+                <p className="text-xs text-slate-500">Ubah kredensial akses pengguna sistem</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 flex items-center gap-3">
+              {userToResetPassword.foto ? (
+                <img src={userToResetPassword.foto} alt="" className="w-11 h-11 rounded-xl object-cover border border-slate-200" />
+              ) : (
+                <div className="w-11 h-11 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                  {userToResetPassword.nama?.[0] || 'U'}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-slate-900 truncate">{userToResetPassword.nama}</p>
+                <p className="text-[11px] text-slate-500 font-mono">NIP / ID: {userToResetPassword.nip || '-'}</p>
+                <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                  {userToResetPassword.role}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Password Baru</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type={showPasswordText ? 'text' : 'password'}
+                    value={newPasswordInput}
+                    onChange={(e) => setNewPasswordInput(e.target.value)}
+                    placeholder="Masukkan password baru..."
+                    className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordText(!showPasswordText)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPasswordText ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setNewPasswordInput('password')}
+                  className="text-[11px] font-bold text-amber-700 hover:text-amber-800 hover:underline flex items-center gap-1"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Reset ke default ("password")</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setUserToResetPassword(null)}
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const updatedPass = newPasswordInput.trim() || 'password';
+                  onUpdateGuru({
+                    ...userToResetPassword,
+                    password: updatedPass
+                  });
+                  triggerToast(`✅ Password untuk ${userToResetPassword.nama} berhasil diperbarui.`);
+                  setUserToResetPassword(null);
+                }}
+                className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-colors shadow-md flex items-center gap-1.5"
+              >
+                <Key className="w-4 h-4" />
+                <span>Simpan Password Baru</span>
               </button>
             </div>
           </div>
