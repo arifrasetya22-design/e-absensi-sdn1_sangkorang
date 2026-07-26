@@ -26,8 +26,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ users, sekolah, onLogi
     setErrorMsg('');
     // Auto populate sample credentials for convenience
     if (r === 'Guru') {
-      setIdentifier('198804122015031002');
-      setPassword('password');
+      setIdentifier('');
+      setPassword('');
     } else if (r === 'Kepala Sekolah') {
       setIdentifier('196805101992031004');
       setPassword('password');
@@ -163,11 +163,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ users, sekolah, onLogi
 
           <form onSubmit={handleFormSubmit} className="space-y-4">
             {selectedRole === 'Guru' && (
-              <div className="p-3 bg-blue-50/90 border border-blue-200 text-blue-900 text-xs rounded-xl flex items-start gap-2.5">
+              <div className="p-3 bg-blue-50/80 border border-blue-200 text-blue-900 text-xs rounded-xl flex items-start gap-2.5">
                 <UserCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold block">Akses Demo Guru</span>
-                  <span className="text-[11px] text-blue-700 block">NIP: <code className="bg-blue-100 px-1 py-0.5 rounded font-mono font-bold">198804122015031002</code> | Password: <code className="bg-blue-100 px-1 py-0.5 rounded font-mono font-bold">password</code></span>
+                  <span className="font-bold block">Portal Akses Mandiri Guru</span>
+                  <span className="text-[11px] text-blue-700">Masukkan NIP / Email Guru & Password Anda untuk masuk ke Dashboard Presensi GPS & Rekap Pribadi.</span>
                 </div>
               </div>
             )}
